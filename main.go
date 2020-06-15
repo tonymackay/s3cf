@@ -91,10 +91,10 @@ func usage() {
 	fmt.Fprintln(os.Stderr, "  AWS_ACCESS_KEY_ID        the AWS Key ID Key with S3 Sync permissions")
 	fmt.Fprintln(os.Stderr, "  AWS_SECRET_ACCESS_KEY    the AWS Secret Key with S3 Sync permissions")
 
-	fmt.Fprintln(os.Stderr, "  S3CF_CF_API_KEY    the Cloudflare API Key used to authenticate when purging cache")
-	fmt.Fprintln(os.Stderr, "  S3CF_CF_API_EMAIL  the Cloudflare Email used to authenticate when purging cache")
-	fmt.Fprintln(os.Stderr, "  S3CF_CF_API_ZONE   the Cloudflare Zone ID used to authenticate when purging cache")
-	fmt.Fprintln(os.Stderr, "  S3CF_CF_BASE_URL   used to build URLS to delete from Cloudflare's cache (eg https://example.com)")
+	fmt.Fprintln(os.Stderr, "  S3CF_CF_API_KEY          the Cloudflare API Key used to authenticate when purging cache")
+	fmt.Fprintln(os.Stderr, "  S3CF_CF_API_EMAIL        the Cloudflare Email used to authenticate when purging cache")
+	fmt.Fprintln(os.Stderr, "  S3CF_CF_API_ZONE         the Cloudflare Zone ID used to authenticate when purging cache")
+	fmt.Fprintln(os.Stderr, "  S3CF_CF_BASE_URL         used to build URLS to delete from Cloudflare's cache (eg https://example.com)")
 }
 
 func sync(localPath, bucketPath string) {
