@@ -37,7 +37,7 @@ var (
 
 func init() {
 	flag.BoolVar(&showVersion, "version", false, "print version number")
-	flag.BoolVar(&dryRun, "dryrun", true, "run command without making changes")
+	flag.BoolVar(&dryRun, "dryrun", false, "run command without making changes")
 	flag.StringVar(&baseURL, "baseurl", os.Getenv("S3CF_CF_BASE_URL"), "used to build URLS to delete from Cloudflare's cache (eg https://example.com)")
 	flag.Usage = usage
 }
