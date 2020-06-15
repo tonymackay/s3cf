@@ -1,4 +1,4 @@
-module github.com/s3cf
+module github.com/tonymackay/s3cf
 
 go 1.14
 
