@@ -32,6 +32,7 @@ var (
 	version     = "dev"
 	dryRun      bool
 	baseURL     string
+	profile     string
 	urls        = make(map[string]struct{})
 )
 
@@ -39,11 +40,16 @@ func init() {
 	flag.BoolVar(&showVersion, "version", false, "print version number")
 	flag.BoolVar(&dryRun, "dryrun", false, "run command without making changes")
 	flag.StringVar(&baseURL, "baseurl", os.Getenv("S3CF_CF_BASE_URL"), "used to build URLS to delete from Cloudflare's cache (eg https://example.com)")
+	flag.StringVar(&profile, "profile", os.Getenv("AWS_PROFILE"), "name of the AWS profile used to authenticate with the API")
 	flag.Usage = usage
 }
 
 func main() {
 	flag.Parse()
+
+	if profile == "" {
+		profile = "default"
+	}
 
 	if showVersion {
 		fmt.Printf("%s %s (runtime: %s)\n", os.Args[0], version, runtime.Version())
@@ -88,11 +94,12 @@ func main() {
 
 func usage() {
 	fmt.Println("s3cf: error: the following arguments are required: paths")
-	fmt.Println("usage: s3cf <LocalPath> <S3Uri> [OPTIONS]")
+	fmt.Println("usage: s3cf [OPTIONS] <LocalPath> <S3Uri>")
 	fmt.Fprintln(os.Stderr, "\nOPTIONS:")
 	flag.PrintDefaults()
 	fmt.Fprintln(os.Stderr, "")
 	fmt.Fprintln(os.Stderr, "ENVIRONMENT:")
+	fmt.Fprintln(os.Stderr, "  AWS_PROFILE              the name of an AWS profile to use")
 	fmt.Fprintln(os.Stderr, "  AWS_ACCESS_KEY_ID        the AWS Key ID Key with S3 Sync permissions")
 	fmt.Fprintln(os.Stderr, "  AWS_SECRET_ACCESS_KEY    the AWS Secret Key with S3 Sync permissions")
 
@@ -105,7 +112,7 @@ func usage() {
 func sync(localPath, bucketPath string) {
 	fmt.Println("Syncing files in folder: '" + localPath + "' with files in S3 bucket: '" + bucketPath + "'")
 
-	args := []string{"s3", "sync", localPath, bucketPath, "--delete", "--size-only", "--exclude=*.DS_Store"}
+	args := []string{"s3", "sync", localPath, bucketPath, "--delete", "--size-only", "--exclude=*.DS_Store", "--profile", profile}
 	if dryRun {
 		args = append(args, "--dryrun")
 	}
@@ -128,7 +135,7 @@ func sync(localPath, bucketPath string) {
 			if _, ok := urls[remoteFilePath]; ok {
 				continue
 			}
-			args := []string{"s3", "cp", filePath, remoteFilePath}
+			args := []string{"s3", "cp", filePath, remoteFilePath, "--profile", profile}
 			if dryRun {
 				args = append(args, "--dryrun")
 			}
