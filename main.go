@@ -58,8 +58,13 @@ func main() {
 	}
 
 	var localPath, bucketPath string
-	//TODO: validate local path
-	localPath = args[0]
+
+	if _, err := os.Stat(args[0]); !os.IsNotExist(err) {
+		localPath = args[0]
+	} else {
+		fmt.Println("the first argument is not a valid path")
+		os.Exit(2)
+	}
 
 	if strings.Contains(args[1], "s3://") {
 		bucketPath = args[1]
