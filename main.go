@@ -184,10 +184,9 @@ func process(cmd *exec.Cmd) {
 		for scanner.Scan() {
 			line := scanner.Text()
 			s3Uri := extractS3Uri(line)
-			if s3Uri == "" {
-				continue
+			if s3Uri != "" {
+				urls[s3Uri] = struct{}{}
 			}
-			urls[s3Uri] = struct{}{}
 			fmt.Println(line)
 		}
 		// We're all done, unblock the channel
