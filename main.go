@@ -208,7 +208,7 @@ func process(cmd *exec.Cmd) {
 
 func list(bucketPath string) bucketObjectList {
 	bucket := bucketName(bucketPath)
-	cmd := exec.Command("aws", "s3api", "list-objects-v2", "--bucket", bucket)
+	cmd := exec.Command("aws", "s3api", "list-objects-v2", "--profile", profile, "--bucket", bucket)
 	var out bytes.Buffer
 	cmd.Stdout = &out
 	cmd.Stderr = cmd.Stdout
