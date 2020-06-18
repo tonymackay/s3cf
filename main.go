@@ -227,7 +227,7 @@ func list(bucketPath string) bucketObjectList {
 }
 
 func purge(apiKey, apiEmail, zoneID, bucketPath string) {
-	fmt.Println("Purging URLs from CloudFlare Cache")
+	fmt.Println("Purging URLs from Cloudflare's edge cache")
 	api, err := cloudflare.New(apiKey, apiEmail)
 	if err != nil {
 		log.Fatal(err)
@@ -236,15 +236,19 @@ func purge(apiKey, apiEmail, zoneID, bucketPath string) {
 	chunkSize := 30
 	batchKeys := make([]string, 0, chunkSize)
 	process := func() {
-		pcr := cloudflare.PurgeCacheRequest{Files: batchKeys}
-		r, err := api.PurgeCache(zoneID, pcr)
-		if err != nil {
-			log.Fatal(err)
-		}
-		if r.Success {
-			fmt.Println("Purged:", batchKeys)
+		if dryRun == false {
+			pcr := cloudflare.PurgeCacheRequest{Files: batchKeys}
+			r, err := api.PurgeCache(zoneID, pcr)
+			if err != nil {
+				log.Fatal(err)
+			}
+			if r.Success {
+				fmt.Println("purged: ", batchKeys)
+			} else {
+				fmt.Println("purge failed: ", batchKeys)
+			}
 		} else {
-			fmt.Println("Purge Failed:", batchKeys)
+			fmt.Println("(dryrun) purged: ", batchKeys)
 		}
 		batchKeys = batchKeys[:0]
 	}
