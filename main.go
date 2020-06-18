@@ -16,6 +16,7 @@ import (
 	"strings"
 
 	"github.com/cloudflare/cloudflare-go"
+	"gopkg.in/ini.v1"
 )
 
 type bucketObjectList struct {
@@ -51,6 +52,31 @@ func main() {
 		profile = "default"
 	}
 
+	// overwrite cloudflare credentials with values from environment
+	cfKey := os.Getenv("S3CF_CF_API_KEY")
+	cfEmail := os.Getenv("S3CF_CF_API_EMAIL")
+	cfZone := os.Getenv("S3CF_CF_API_ZONE")
+
+	// attempt to load cloudflare credentials from disk
+	sharedCredentialsPath := os.Getenv("HOME") + "/.aws/credentials"
+	cfg, err := ini.Load(sharedCredentialsPath)
+	if err == nil {
+		if cfKey == "" {
+			cfKey = cfg.Section(profile).Key("cf_api_key").String()
+		}
+		if cfEmail == "" {
+			cfEmail = cfg.Section(profile).Key("cf_api_email").String()
+		}
+		if cfZone == "" {
+			cfZone = cfg.Section(profile).Key("cf_api_zone").String()
+		}
+		if baseURL == "" {
+			baseURL = cfg.Section(profile).Key("cf_base_url").String()
+		}
+	} else {
+		fmt.Println("Could not load credentials from " + sharedCredentialsPath)
+	}
+
 	if showVersion {
 		fmt.Printf("%s %s (runtime: %s)\n", os.Args[0], version, runtime.Version())
 		os.Exit(0)
@@ -81,12 +107,8 @@ func main() {
 
 	sync(localPath, bucketPath)
 
-	apiKey := os.Getenv("S3CF_CF_API_KEY")
-	apiEmail := os.Getenv("S3CF_CF_API_EMAIL")
-	zoneID := os.Getenv("S3CF_CF_API_ZONE")
-
-	if apiKey != "" && apiEmail != "" && zoneID != "" {
-		purge(apiKey, apiEmail, zoneID, bucketPath)
+	if cfKey != "" && cfEmail != "" && cfZone != "" {
+		purge(cfKey, cfEmail, cfZone, bucketPath)
 	} else {
 		fmt.Println("Skipped Cloudflare cache purge because the environment variables are not set")
 	}

@@ -9,15 +9,29 @@ Since it's possible for locally modified files to be missed by the `--size-only`
 The program requires the AWS CLI and needs credentials configured.
 
 ## Environment Variables
-
-
 The following variables are required in order to purge modified URLS from Cloudflare's edge cache.
 
 ```
 export S3CF_CF_API_KEY=<cloudflare_api_key>
 export S3CF_CF_API_EMAIL=<cloudflare_email>
 export S3CF_CF_API_ZONE=<cloudflare_zone_id>
-export S3CF_CF_BASE_URL=<https://mywebsite.com
+export S3CF_CF_BASE_URL=<https://mywebsite.com>
+```
+
+Alternatively, you can add the Cloudflare variables to the `~/.aws/credentials` file. See the following example:
+
+```
+[default]
+aws_access_key_id = <aws_access_key_id>
+aws_secret_access_key = <aws_secret_access_key>
+
+[development]
+aws_access_key_id = <aws_access_key_id>
+aws_secret_access_key = <aws_secret_access_key>
+cf_api_key = <cloudflare_api_key>
+cf_api_email = <cloudflare_email>
+cf_api_zone =  <cloudflare_zone_id>
+cf_base_url = <https://mywebsite.com>
 ```
 
 ## Usage
