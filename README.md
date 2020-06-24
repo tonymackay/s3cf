@@ -6,32 +6,31 @@ This program uses the AWS CLI to execute the `sync` command using the `--size-on
 Since it's possible for locally modified files to be missed by the `--size-only` option, the program will also do a second pass comparing the MD5 of each local file with the remote ETag value. If they don't match, the local file will overwrite the file stored in the S3 bucket.
 
 ## Prerequisites
-The program requires the AWS CLI and needs credentials configured.
+This program requires version 2.0+ of the AWS CLI to be installed alongside s3cf and the AWS environment variables need set with credentials that have permissions to access S3.
+
+## Building
+Clone the repo then run the following commands:
+
+```
+go mod download
+go build
+```
 
 ## Environment Variables
+The minimum required environment variables are the AWS credentials. This will allow you to sync to an S3 bucket but will not purge URLs from the Cloudflare edge cache. 
+
+```
+AWS_ACCESS_KEY_ID=<aws_access_key_id>
+AWS_SECRET_ACCESS_KEY=<aws_secret_access_key>
+```
+
 The following variables are required in order to purge modified URLS from Cloudflare's edge cache.
 
 ```
-export S3CF_CF_API_KEY=<cloudflare_api_key>
-export S3CF_CF_API_EMAIL=<cloudflare_email>
-export S3CF_CF_API_ZONE=<cloudflare_zone_id>
-export S3CF_CF_BASE_URL=<https://mywebsite.com>
-```
-
-Alternatively, you can add the Cloudflare variables to the `~/.aws/credentials` file. See the following example:
-
-```
-[default]
-aws_access_key_id = <aws_access_key_id>
-aws_secret_access_key = <aws_secret_access_key>
-
-[development]
-aws_access_key_id = <aws_access_key_id>
-aws_secret_access_key = <aws_secret_access_key>
-cf_api_key = <cloudflare_api_key>
-cf_api_email = <cloudflare_email>
-cf_api_zone =  <cloudflare_zone_id>
-cf_base_url = <https://mywebsite.com>
+S3CF_CF_API_KEY=<cloudflare_api_key>
+S3CF_CF_API_EMAIL=<cloudflare_email>
+S3CF_CF_API_ZONE=<cloudflare_zone_id>
+S3CF_CF_BASE_URL=<https://mywebsite.com>
 ```
 
 ## Usage
@@ -51,10 +50,31 @@ Purging URLs from CloudFlare Cache
 Purged: [https://mywebsite.com/hello-world/, https://mywebsite.com/]
 ```
 
-If you need to specify a specific profile in the aws credentials file. You can use the `-profile` option. For example:
+## Building with Docker
+In order to make sure s3cf works on multiple machines, you can use a Docker image. The repo includes a Dockerfile which takes care of installing s3cf and bundling it with the latest AWS CLI. It can be built using the following command:
 
 ```
-s3cf -profile development www s3://mybucketname
+./version build
+```
+
+To publish to Docker Hub run:
+
+```
+DOCKER_ID=<yourcompany> ./version publish
+```
+
+## Running Docker image
+The following example shows how to run s3cf from inside the Docker image. 
+
+```
+docker run --rm -it \
+-e AWS_ACCESS_KEY_ID="$AWS_ACCESS_KEY_ID" \
+-e AWS_SECRET_ACCESS_KEY="$AWS_SECRET_ACCESS_KEY" \
+-e S3CF_CF_API_KEY="$S3CF_CF_API_KEY" \
+-e S3CF_CF_API_EMAIL="$S3CF_CF_API_EMAIL" \
+-e S3CF_CF_API_ZONE="$S3CF_CF_API_ZONE" \
+-e S3CF_CF_BASE_URL="$S3CF_CF_BASE_URL" \
+-v $(pwd):/s3cf <yourcompany>/s3cf www s3://mybucketname
 ```
 
 ## License

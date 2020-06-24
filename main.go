@@ -16,7 +16,6 @@ import (
 	"strings"
 
 	"github.com/cloudflare/cloudflare-go"
-	"gopkg.in/ini.v1"
 )
 
 type bucketObjectList struct {
@@ -41,41 +40,16 @@ func init() {
 	flag.BoolVar(&showVersion, "version", false, "print version number")
 	flag.BoolVar(&dryRun, "dryrun", false, "run command without making changes")
 	flag.StringVar(&baseURL, "baseurl", os.Getenv("S3CF_CF_BASE_URL"), "used to build URLS to delete from Cloudflare's cache (eg https://example.com)")
-	flag.StringVar(&profile, "profile", os.Getenv("AWS_PROFILE"), "name of the AWS profile used to authenticate with the API")
 	flag.Usage = usage
 }
 
 func main() {
 	flag.Parse()
 
-	if profile == "" {
-		profile = "default"
-	}
-
 	// overwrite cloudflare credentials with values from environment
 	cfKey := os.Getenv("S3CF_CF_API_KEY")
 	cfEmail := os.Getenv("S3CF_CF_API_EMAIL")
 	cfZone := os.Getenv("S3CF_CF_API_ZONE")
-
-	// attempt to load cloudflare credentials from disk
-	sharedCredentialsPath := os.Getenv("HOME") + "/.aws/credentials"
-	cfg, err := ini.Load(sharedCredentialsPath)
-	if err == nil {
-		if cfKey == "" {
-			cfKey = cfg.Section(profile).Key("cf_api_key").String()
-		}
-		if cfEmail == "" {
-			cfEmail = cfg.Section(profile).Key("cf_api_email").String()
-		}
-		if cfZone == "" {
-			cfZone = cfg.Section(profile).Key("cf_api_zone").String()
-		}
-		if baseURL == "" {
-			baseURL = cfg.Section(profile).Key("cf_base_url").String()
-		}
-	} else {
-		fmt.Println("Could not load credentials from " + sharedCredentialsPath)
-	}
 
 	if showVersion {
 		fmt.Printf("%s %s (runtime: %s)\n", os.Args[0], version, runtime.Version())
@@ -121,7 +95,6 @@ func usage() {
 	flag.PrintDefaults()
 	fmt.Fprintln(os.Stderr, "")
 	fmt.Fprintln(os.Stderr, "ENVIRONMENT:")
-	fmt.Fprintln(os.Stderr, "  AWS_PROFILE              the name of an AWS profile to use")
 	fmt.Fprintln(os.Stderr, "  AWS_ACCESS_KEY_ID        the AWS Key ID Key with S3 Sync permissions")
 	fmt.Fprintln(os.Stderr, "  AWS_SECRET_ACCESS_KEY    the AWS Secret Key with S3 Sync permissions")
 
@@ -134,7 +107,7 @@ func usage() {
 func sync(localPath, bucketPath string) {
 	fmt.Println("Syncing files in folder: '" + localPath + "' with files in S3 bucket: '" + bucketPath + "'")
 
-	args := []string{"s3", "sync", localPath, bucketPath, "--delete", "--size-only", "--exclude=*.DS_Store", "--profile", profile}
+	args := []string{"s3", "sync", localPath, bucketPath, "--delete", "--size-only", "--exclude=*.DS_Store"}
 	if dryRun {
 		args = append(args, "--dryrun")
 	}
@@ -157,7 +130,7 @@ func sync(localPath, bucketPath string) {
 			if _, ok := urls[remoteFilePath]; ok {
 				continue
 			}
-			args := []string{"s3", "cp", filePath, remoteFilePath, "--profile", profile}
+			args := []string{"s3", "cp", filePath, remoteFilePath}
 			if dryRun {
 				args = append(args, "--dryrun")
 			}
@@ -208,7 +181,7 @@ func process(cmd *exec.Cmd) {
 
 func list(bucketPath string) bucketObjectList {
 	bucket := bucketName(bucketPath)
-	cmd := exec.Command("aws", "s3api", "list-objects-v2", "--profile", profile, "--bucket", bucket)
+	cmd := exec.Command("aws", "s3api", "list-objects-v2", "--bucket", bucket)
 	var out bytes.Buffer
 	cmd.Stdout = &out
 	cmd.Stderr = cmd.Stdout
