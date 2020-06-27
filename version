@@ -2,8 +2,8 @@
 
 ARG=$1
 APP_NAME=s3cf
-GIT_TAG=v1.0.3-beta1
-IMG_TAG=1.0.3-beta1
+GIT_TAG=v1.0.0-beta1
+IMG_TAG=1.0.0-beta1
 
 if [ "$DOCKER_ID" == "" ]; then
   DOCKER_ID=tonymackay
