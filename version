@@ -1,0 +1,27 @@
+#!/bin/bash
+
+ARG=$1
+APP_NAME=s3cf
+GIT_TAG=v1.0.3-beta1
+IMG_TAG=1.0.3-beta1
+
+if [ "$DOCKER_ID" == "" ]; then
+  DOCKER_ID=tonymackay
+fi
+
+if [ "$PASSWORD" == "" ]; then
+  PASSWORD=$(cat ~/.docker/password.txt)
+fi
+
+if [ "$ARG" == "build" ]; then
+  echo "build Docker image"
+  docker build -t "$DOCKER_ID/$APP_NAME" --build-arg GIT_TAG=$GIT_TAG .
+  echo "create tag $IMG_TAG"
+  docker tag "$DOCKER_ID/$APP_NAME" "$DOCKER_ID/$APP_NAME:$IMG_TAG"
+fi
+
+if [ "$ARG" == "publish" ]; then
+  echo "publish Docker image"
+  echo "$PASSWORD" | docker login -u "$DOCKER_ID" --password-stdin
+  docker push "$DOCKER_ID/$APP_NAME:$IMG_TAG"
+fi
