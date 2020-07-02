@@ -1,3 +1,5 @@
+*Note: This project was initially created to sync my websites to S3 and purge the Cloudflare cache at the same time, but I'm no longer using it because I have separated the functionality into two programs called [s3-sync](https://github.com/tonymackay/s3-sync) and [cf-purge](https://github.com/tonymackay/cf-purge) which works better for CI/CD. I've archived this repository and will no longer be maintaining it.*
+
 # s3cf
 A go program that syncs a static website to an S3 bucket and purges URLs stored in Cloudflare's edge cache. 
 
